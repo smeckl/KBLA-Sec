@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CollectionAgent")]
-[assembly: AssemblyDescription("KBLA-Sec Host-based Collection Agent")]
+[assembly: AssemblyTitle("TestClient")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CollectionAgent")]
+[assembly: AssemblyProduct("TestClient")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("49714838-080d-4294-a499-2c6f609391bf")]
+[assembly: Guid("4f0dbcce-4c60-4133-8ea7-17b41bd60826")]
 
 // Version information for an assembly consists of the following four values:
 //

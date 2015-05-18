@@ -6,6 +6,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+*.cer
+*.pvk
 
 # Build results
 [Dd]ebug/

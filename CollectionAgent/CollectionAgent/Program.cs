@@ -12,14 +12,24 @@ namespace CollectionAgent
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-        static void Main()
+        static void Main(string[] args)
         {
-            ServiceBase[] ServicesToRun;
-            ServicesToRun = new ServiceBase[]
+            // If there are no command-line arguments, then run this as a service
+            if (args.Length < 1)
             {
-                new CollectionAgentService()
-            };
-            ServiceBase.Run(ServicesToRun);
+                ServiceBase[] ServicesToRun;
+                ServicesToRun = new ServiceBase[]
+                {
+                    new CollectionAgentService()
+                };
+                ServiceBase.Run(ServicesToRun);
+            }
+            else
+            {
+                // If there are no command-line arguments, then run this as a service
+                CollectionAgentService svc = new CollectionAgentService();
+                svc.runService(args[0], Convert.ToInt32(args[1]));
+            }
         }
     }
 }
