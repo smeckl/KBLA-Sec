@@ -68,38 +68,20 @@ namespace TestClient
                 return;
             }
 
-            byte[] messsage = Encoding.UTF8.GetBytes("{ \"requestID\":1,\"requestType\":\"CollectionAgentMessage\"}<EOF>");
+            //byte[] messsage = Encoding.UTF8.GetBytes("{ \"requestID\":1,\"requestType\":\"CollectionAgentMessage\"}<EOF>");
             //byte[] messsage = Encoding.UTF8.GetBytes("Hello from the client.<EOF>");
 
             // Send hello message to the server. 
-            sslStream.Write(messsage);
-            sslStream.Flush();
+            //sslStream.Write(messsage);
+            //sslStream.Flush();
 
-            // Encode a test message into a byte array. 
-            // Signal the end of the message using the "<EOF>".
             
-            /*
             CollectionAgentMessage msg = new CollectionAgentMessage();
             msg.requestID = 1;
             msg.requestType = "CollectionAgentMessage";
 
-            //Create a stream to serialize the object to.
-            MemoryStream ms = new MemoryStream();
-
-            // Serializer the User object to the stream.
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(CollectionAgentMessage));
-            ser.WriteObject(ms, msg);
-
-            byte[] jsonMsg = ms.ToArray();
-            ms.Close();
-
-            String str = Encoding.UTF8.GetString(jsonMsg);
-            Console.WriteLine(str);
-
-            // Send hello message to the server. 
-            sslStream.Write(jsonMsg);
-            sslStream.Flush();
-            */
+            // Send the message to the CollectionAgent
+            SendMessage(sslStream, msg);
 
             // Read message from the server. 
             string serverMessage = ReadMessage(sslStream);
@@ -139,20 +121,55 @@ namespace TestClient
 
             return messageData.ToString();
         }
+
+        private static void SendMessage(SslStream sslStream, CollectionAgentMessage message)
+        {
+            //Create a stream to serialize the object to.
+            MemoryStream ms = new MemoryStream();
+
+            // Serializer the User object to the stream.
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(CollectionAgentMessage));
+            ser.WriteObject(ms, message);
+
+            byte[] jsonMsg = ms.ToArray();
+            ms.Close();
+
+            // Use Decoder class to convert from bytes to UTF8 
+            // in case a character spans two buffers.
+            Decoder decoder = Encoding.UTF8.GetDecoder();
+
+            int bytes = jsonMsg.Length;
+            char[] chars = new char[decoder.GetCharCount(jsonMsg, 0, bytes)];
+            decoder.GetChars(jsonMsg, 0, bytes, chars, 0);
+
+            StringBuilder strJSONMsg = new StringBuilder();
+            strJSONMsg.Append(chars);
+            strJSONMsg.Append("<EOF>");
+
+            Console.WriteLine(strJSONMsg.ToString());
+
+            // Send hello message to the server. 
+            sslStream.Write(Encoding.UTF8.GetBytes(strJSONMsg.ToString()));
+            sslStream.Flush();
+        }
+
         private static void DisplayUsage()
         {
             Console.WriteLine("To start the client specify:");
             Console.WriteLine("clientSync machineName [serverName]");
             Environment.Exit(1);
         }
+
         public static int Main(string[] args)
         {
             string serverCertificateName = null;
             string machineName = null;
+
             if (args == null || args.Length < 1)
             {
                 DisplayUsage();
             }
+
             // User can specify the machine name and server name. 
             // Server name must match the name on the server's certificate. 
             machineName = args[0];
@@ -164,6 +181,7 @@ namespace TestClient
             {
                 serverCertificateName = args[1];
             }
+
             Program.RunClient(machineName, serverCertificateName);
             return 0;
         }
