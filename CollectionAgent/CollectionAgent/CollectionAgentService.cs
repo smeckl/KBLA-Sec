@@ -13,6 +13,8 @@ using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.IO;
+using System.Runtime.Serialization.Json;
+using caShared;
 
 namespace CollectionAgent
 {
@@ -78,9 +80,9 @@ namespace CollectionAgent
 
                 // Read a message from the client.   
                 Console.WriteLine("Waiting for client message...");
-                string messageData = ReadMessage(sslStream);
+                CollectionAgentMessage caMsg = ReadMessage(sslStream);
 
-                Console.WriteLine("Received: {0}", messageData);
+                Console.WriteLine("Received: {0}", caMsg.ToString());
 
                 // Write a message to the client. 
                 byte[] message = Encoding.UTF8.GetBytes("Hello from the server.<EOF>");
@@ -109,7 +111,7 @@ namespace CollectionAgent
                 client.Close();
             }
         }
-        static string ReadMessage(SslStream sslStream)
+        static CollectionAgentMessage ReadMessage(SslStream sslStream)
         {
             // Read the  message sent by the client. 
             // The client signals the end of the message using the 
@@ -125,17 +127,42 @@ namespace CollectionAgent
                 // Use Decoder class to convert from bytes to UTF8 
                 // in case a character spans two buffers.
                 Decoder decoder = Encoding.UTF8.GetDecoder();
+
                 char[] chars = new char[decoder.GetCharCount(buffer, 0, bytes)];
                 decoder.GetChars(buffer, 0, bytes, chars, 0);
                 messageData.Append(chars);
-                // Check for EOF or an empty message. 
+
                 if (messageData.ToString().IndexOf("<EOF>") != -1)
-                {
+                {                    
                     break;
                 }
             } while (bytes != 0);
 
-            return messageData.ToString();
+            // Convert to String object
+            String strMessage = messageData.ToString();
+
+            // If there is a trailing <EOF> character, strip it so that JSON
+            // deserialization will work correctly
+            int index = (strMessage.IndexOf("<EOF>"));
+            if(index != -1)
+            {
+                strMessage = strMessage.Substring(0, index);
+            }
+
+            // Create a new CollectionAgentMsg object to serialize to
+            CollectionAgentMessage deserializedMsg = new CollectionAgentMessage();
+
+            // Read String data into a MemoryStream so it can be deserialized
+            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(strMessage));
+
+            // Deserialize the stream into an object
+            // TODO: May need to handle exceptions here.
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedMsg.GetType());
+            deserializedMsg = ser.ReadObject(ms) as CollectionAgentMessage;
+            ms.Close();
+
+            // Return the new object
+            return deserializedMsg;
         }
     }
 }

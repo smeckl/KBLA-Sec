@@ -7,6 +7,8 @@ using System.Security.Authentication;
 using System.Text;
 using System.Security.Cryptography.X509Certificates;
 using System.IO;
+using System.Runtime.Serialization.Json;
+using caShared;
 
 namespace TestClient
 {
@@ -43,8 +45,7 @@ namespace TestClient
             Console.WriteLine("Client connected.");
 
             // Create an SSL stream that will close the client's stream.
-            SslStream sslStream = new SslStream(
-                                                client.GetStream(),
+            SslStream sslStream = new SslStream(client.GetStream(),
                                                 false,
                                                 new RemoteCertificateValidationCallback(ValidateServerCertificate),
                                                 null
@@ -67,13 +68,38 @@ namespace TestClient
                 return;
             }
 
-            // Encode a test message into a byte array. 
-            // Signal the end of the message using the "<EOF>".
-            byte[] messsage = Encoding.UTF8.GetBytes("Hello from the client.<EOF>");
+            byte[] messsage = Encoding.UTF8.GetBytes("{ \"requestID\":1,\"requestType\":\"CollectionAgentMessage\"}<EOF>");
+            //byte[] messsage = Encoding.UTF8.GetBytes("Hello from the client.<EOF>");
 
             // Send hello message to the server. 
             sslStream.Write(messsage);
             sslStream.Flush();
+
+            // Encode a test message into a byte array. 
+            // Signal the end of the message using the "<EOF>".
+            
+            /*
+            CollectionAgentMessage msg = new CollectionAgentMessage();
+            msg.requestID = 1;
+            msg.requestType = "CollectionAgentMessage";
+
+            //Create a stream to serialize the object to.
+            MemoryStream ms = new MemoryStream();
+
+            // Serializer the User object to the stream.
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(CollectionAgentMessage));
+            ser.WriteObject(ms, msg);
+
+            byte[] jsonMsg = ms.ToArray();
+            ms.Close();
+
+            String str = Encoding.UTF8.GetString(jsonMsg);
+            Console.WriteLine(str);
+
+            // Send hello message to the server. 
+            sslStream.Write(jsonMsg);
+            sslStream.Flush();
+            */
 
             // Read message from the server. 
             string serverMessage = ReadMessage(sslStream);
