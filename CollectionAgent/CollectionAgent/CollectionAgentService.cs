@@ -14,6 +14,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.IO;
 using System.Runtime.Serialization.Json;
+using System.Collections.Generic;
 using caShared;
 
 namespace CollectionAgent
@@ -67,8 +68,8 @@ namespace CollectionAgent
         {
             // A client has connected. Create the  
             // SslStream using the client's network stream.
-            SslStream sslStream = new SslStream(
-                client.GetStream(), false);
+            SslStream sslStream = new SslStream(client.GetStream(), false);
+
             // Authenticate the server but don't require the client to authenticate. 
             sslStream.AuthenticateAsServer(serverCertificate, false, SslProtocols.Tls, true);
 
@@ -84,11 +85,20 @@ namespace CollectionAgent
 
                 Console.WriteLine("Received: {0}", caMsg.ToString());
 
-                // Write a message to the client. 
-                byte[] message = Encoding.UTF8.GetBytes("Hello from the server.<EOF>");
-                Console.WriteLine("Sending hello message.");
-
-                sslStream.Write(message);
+                if (null != caMsg)
+                {                    
+                    // Write a message to the client. 
+                    byte[] message = Encoding.UTF8.GetBytes("Hello from the server.<EOF>");
+                    Console.WriteLine("Sending hello message.");
+                    sslStream.Write(message);
+                }
+                else
+                {
+                    // Write a message to the client. 
+                    byte[] message = Encoding.UTF8.GetBytes("Invalid JSON Message.<EOF>");
+                    Console.WriteLine("Sending ERROR message.");
+                    sslStream.Write(message);
+                }                
             }
             catch (AuthenticationException e)
             {
@@ -138,28 +148,7 @@ namespace CollectionAgent
                 }
             } while (bytes != 0);
 
-            // Convert to String object
-            String strMessage = messageData.ToString();
-
-            // If there is a trailing <EOF> character, strip it so that JSON
-            // deserialization will work correctly
-            int index = (strMessage.IndexOf("<EOF>"));
-            if(index != -1)
-            {
-                strMessage = strMessage.Substring(0, index);
-            }
-
-            // Create a new CollectionAgentMsg object to serialize to
-            CollectionAgentMessage deserializedMsg = new CollectionAgentMessage();
-
-            // Read String data into a MemoryStream so it can be deserialized
-            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(strMessage));
-
-            // Deserialize the stream into an object
-            // TODO: May need to handle exceptions here.
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedMsg.GetType());
-            deserializedMsg = ser.ReadObject(ms) as CollectionAgentMessage;
-            ms.Close();
+            CollectionAgentMessage deserializedMsg =  CollectionAgentMessage.deserializeMessage(messageData.ToString());
 
             // Return the new object
             return deserializedMsg;

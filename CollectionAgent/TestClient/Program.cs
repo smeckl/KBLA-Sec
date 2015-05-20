@@ -7,7 +7,6 @@ using System.Security.Authentication;
 using System.Text;
 using System.Security.Cryptography.X509Certificates;
 using System.IO;
-using System.Runtime.Serialization.Json;
 using caShared;
 
 namespace TestClient
@@ -68,17 +67,8 @@ namespace TestClient
                 return;
             }
 
-            //byte[] messsage = Encoding.UTF8.GetBytes("{ \"requestID\":1,\"requestType\":\"CollectionAgentMessage\"}<EOF>");
-            //byte[] messsage = Encoding.UTF8.GetBytes("Hello from the client.<EOF>");
-
-            // Send hello message to the server. 
-            //sslStream.Write(messsage);
-            //sslStream.Flush();
-
-            
-            CollectionAgentMessage msg = new CollectionAgentMessage();
-            msg.requestID = 1;
-            msg.requestType = "CollectionAgentMessage";
+            DerivedCollectionAgentMessage msg = new DerivedCollectionAgentMessage(1, "Message from derived class.");
+            //CollectionAgentMessage msg = new CollectionAgentMessage(1);
 
             // Send the message to the CollectionAgent
             SendMessage(sslStream, msg);
@@ -124,32 +114,10 @@ namespace TestClient
 
         private static void SendMessage(SslStream sslStream, CollectionAgentMessage message)
         {
-            //Create a stream to serialize the object to.
-            MemoryStream ms = new MemoryStream();
-
-            // Serializer the User object to the stream.
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(CollectionAgentMessage));
-            ser.WriteObject(ms, message);
-
-            byte[] jsonMsg = ms.ToArray();
-            ms.Close();
-
-            // Use Decoder class to convert from bytes to UTF8 
-            // in case a character spans two buffers.
-            Decoder decoder = Encoding.UTF8.GetDecoder();
-
-            int bytes = jsonMsg.Length;
-            char[] chars = new char[decoder.GetCharCount(jsonMsg, 0, bytes)];
-            decoder.GetChars(jsonMsg, 0, bytes, chars, 0);
-
-            StringBuilder strJSONMsg = new StringBuilder();
-            strJSONMsg.Append(chars);
-            strJSONMsg.Append("<EOF>");
-
-            Console.WriteLine(strJSONMsg.ToString());
+            Console.WriteLine(message.ToJSON());
 
             // Send hello message to the server. 
-            sslStream.Write(Encoding.UTF8.GetBytes(strJSONMsg.ToString()));
+            sslStream.Write(Encoding.UTF8.GetBytes(message.ToJSON()));
             sslStream.Flush();
         }
 
