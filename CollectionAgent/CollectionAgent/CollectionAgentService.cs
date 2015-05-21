@@ -14,7 +14,6 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.IO;
 using System.Runtime.Serialization.Json;
-using System.Collections.Generic;
 using caShared;
 
 namespace CollectionAgent
@@ -64,7 +63,7 @@ namespace CollectionAgent
             serverCertificate = X509Certificate.CreateFromCertFile(".\\collectionAgentSvc.cer");
         }
 
-        static void ProcessClient(TcpClient client)
+        private static void ProcessClient(TcpClient client)
         {
             // A client has connected. Create the  
             // SslStream using the client's network stream.
@@ -83,21 +82,24 @@ namespace CollectionAgent
                 Console.WriteLine("Waiting for client message...");
                 CollectionAgentMessage caMsg = ReadMessage(sslStream);
 
-                Console.WriteLine("Received: {0}", caMsg.ToString());
+                Console.WriteLine("Received: {0}", caMsg.ToJSON());
 
                 if (null != caMsg)
-                {                    
-                    // Write a message to the client. 
-                    byte[] message = Encoding.UTF8.GetBytes("Hello from the server.<EOF>");
-                    Console.WriteLine("Sending hello message.");
-                    sslStream.Write(message);
+                {
+                    // We have a valid query, process it
+                    CollectionAgentMessage caResp = processClientQuery(caMsg);                    
+                 
+                    Console.WriteLine("Sending response message.");
+                    sslStream.Write(Encoding.UTF8.GetBytes(caResp.ToJSON()));
                 }
                 else
                 {
-                    // Write a message to the client. 
-                    byte[] message = Encoding.UTF8.GetBytes("Invalid JSON Message.<EOF>");
-                    Console.WriteLine("Sending ERROR message.");
-                    sslStream.Write(message);
+                    // Write a response message to the client. 
+                    CollectionAgentErrorMessage caResp = new CollectionAgentErrorMessage(caMsg.requestID,
+                                                                                         "ERROR parsing JSON request.");
+
+                    Console.WriteLine("Sending ERROR response message.");
+                    sslStream.Write(Encoding.UTF8.GetBytes(caResp.ToJSON()));
                 }                
             }
             catch (AuthenticationException e)
@@ -121,7 +123,8 @@ namespace CollectionAgent
                 client.Close();
             }
         }
-        static CollectionAgentMessage ReadMessage(SslStream sslStream)
+
+        private static CollectionAgentMessage ReadMessage(SslStream sslStream)
         {
             // Read the  message sent by the client. 
             // The client signals the end of the message using the 
@@ -148,10 +151,44 @@ namespace CollectionAgent
                 }
             } while (bytes != 0);
 
-            CollectionAgentMessage deserializedMsg =  CollectionAgentMessage.deserializeMessage(messageData.ToString());
+            CollectionAgentMessage deserializedMsg =  CollectionAgentMessageFactory.constructMessageFromJSON(messageData.ToString());
 
             // Return the new object
             return deserializedMsg;
+        }
+
+        // This method is responsible for processing a query based on a message passed
+        // by a client.
+        // For now, this is a skeleton function only.  As reall queries are created, this function
+        // will be populated with calls to code that will actually process and respond to the
+        // queries.
+        private static CollectionAgentMessage processClientQuery(CollectionAgentMessage caMsg)
+        {
+            MessageType msgType = CollectionAgentMessageFactory.MessageTypeMap[caMsg.requestType];
+
+            // Write a response message to the client. 
+            CollectionAgentMessage caResp = null;
+
+            switch (msgType)
+            {
+                case MessageType.CollectionAgentMessage:
+                    caResp = new CollectionAgentResponseMessage(caMsg.requestID, "Request processed successfully.");
+                    break;
+
+                case MessageType.DerivedCollectionAgentMessage:
+                    caResp = new CollectionAgentResponseMessage(caMsg.requestID, "Request processed successfully.");
+                    break;
+
+                case MessageType.CollectionAgentResponseMessage:
+                    caResp = new CollectionAgentResponseMessage(caMsg.requestID, "Request processed successfully.");
+                    break;
+
+                default:
+                    caResp = new CollectionAgentErrorMessage(caMsg.requestID, "ERROR:  Invalid request type.");
+                    break;
+            }          
+
+            return caResp;
         }
     }
 }

@@ -41,6 +41,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CollectionAgentErrorMessage.cs" />
+    <Compile Include="CollectionAgentMessageFactory.cs" />
+    <Compile Include="CollectionAgentResponseMessage.cs" />
     <Compile Include="DerivedCollectionAgentMessage.cs" />
     <Compile Include="CollectionAgentMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

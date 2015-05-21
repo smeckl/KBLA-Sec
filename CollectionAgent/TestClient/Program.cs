@@ -74,15 +74,15 @@ namespace TestClient
             SendMessage(sslStream, msg);
 
             // Read message from the server. 
-            string serverMessage = ReadMessage(sslStream);
+            CollectionAgentMessage caMsg = ReadMessage(sslStream);
 
-            Console.WriteLine("Server says: {0}", serverMessage);
+            Console.WriteLine("Server says: {0}", caMsg.ToJSON());
 
             // Close the client connection.
             client.Close();
             Console.WriteLine("Client closed.");
         }
-        static string ReadMessage(SslStream sslStream)
+        static CollectionAgentMessage ReadMessage(SslStream sslStream)
         {
             // Read the  message sent by the server. 
             // The end of the message is signaled using the 
@@ -109,7 +109,10 @@ namespace TestClient
                 }
             } while (bytes != 0);
 
-            return messageData.ToString();
+            CollectionAgentMessage deserializedMsg = CollectionAgentMessageFactory.constructMessageFromJSON(messageData.ToString());
+
+            // Return the new object
+            return deserializedMsg;
         }
 
         private static void SendMessage(SslStream sslStream, CollectionAgentMessage message)

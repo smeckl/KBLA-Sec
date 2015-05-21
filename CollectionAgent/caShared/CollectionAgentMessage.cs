@@ -8,23 +8,11 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 
 namespace caShared
-{
-    public enum MessageType
-    {
-        CollectionAgentMessage,
-        DerivedCollectionAgentMessage
-    }
-
+{    
     [DataContract]
     [KnownType(typeof(DerivedCollectionAgentMessage))]
     public class CollectionAgentMessage
-    {
-        public static Dictionary<String, caShared.MessageType> MessageTypeMap = new Dictionary<string, caShared.MessageType>()
-        {
-            { "CollectionAgentMessage", caShared.MessageType.CollectionAgentMessage },
-            { "DerivedCollectionAgentMessage", caShared.MessageType.DerivedCollectionAgentMessage }
-        };
-
+    {        
         [DataMember]
         public ulong requestID { get; set; }
 
@@ -64,66 +52,6 @@ namespace caShared
             strJSONMsg.Append("<EOF>");
 
             return strJSONMsg.ToString();
-        }
-
-        public static CollectionAgentMessage deserializeMessage(String strMessage)
-        {
-            // If there is a trailing <EOF> character, strip it so that JSON
-            // deserialization will work correctly
-            int index = (strMessage.IndexOf("<EOF>"));
-            if (index != -1)
-            {
-                strMessage = strMessage.Substring(0, index);
-            }
-
-            // Create a new CollectionAgentMsg object to serialize to
-            CollectionAgentMessage deserializedMsg = new CollectionAgentMessage();
-
-            // Read String data into a MemoryStream so it can be deserialized
-            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(strMessage));
-
-            // Deserialize the stream into an object
-            // TODO: May need to handle exceptions here.
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedMsg.GetType());
-            deserializedMsg = ser.ReadObject(ms) as CollectionAgentMessage;
-            ms.Close();
-
-            return buildDerivedMessageObject(strMessage, deserializedMsg.requestType);
-        }
-
-        private static CollectionAgentMessage buildDerivedMessageObject(String strMessage, String strRequestType)
-        {
-            MessageType msgType = MessageTypeMap[strRequestType];
-
-            CollectionAgentMessage caMsg = null;
-
-            // Read String data into a MemoryStream so it can be deserialized
-            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(strMessage));
-
-            // Deserialize the stream into an object
-            // TODO: May need to handle exceptions here.
-            DataContractJsonSerializer ser = null;
-
-            switch (msgType)
-            {
-                case MessageType.CollectionAgentMessage:
-                    ser = new DataContractJsonSerializer(typeof(CollectionAgentMessage));
-                    caMsg = ser.ReadObject(ms) as CollectionAgentMessage;
-                    break;
-
-                case MessageType.DerivedCollectionAgentMessage:
-                    ser = new DataContractJsonSerializer(typeof(DerivedCollectionAgentMessage));
-                    caMsg = ser.ReadObject(ms) as DerivedCollectionAgentMessage;
-                    break;
-
-                default:
-                    ser = null;
-                    break;
-            }
-
-            ms.Close();
-
-            return caMsg;
-        }
+        }        
     }
 }
