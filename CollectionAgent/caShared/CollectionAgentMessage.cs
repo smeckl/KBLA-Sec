@@ -12,7 +12,9 @@ namespace caShared
     [DataContract]
     [KnownType(typeof(DerivedCollectionAgentMessage))]
     public class CollectionAgentMessage
-    {        
+    {
+        private static String strRequestType = "CollectionAgentMessage";
+
         [DataMember]
         public ulong requestID { get; set; }
 
@@ -24,7 +26,7 @@ namespace caShared
         public CollectionAgentMessage(ulong ulReqID)
         {
             requestID = ulReqID;
-            requestType = "CollectionAgentMessage";
+            requestType = strRequestType;
         }
 
         public String ToJSON()
@@ -52,6 +54,11 @@ namespace caShared
             strJSONMsg.Append("<EOF>");
 
             return strJSONMsg.ToString();
-        }        
+        }   
+        
+        public virtual Boolean isValid()
+        {
+            return (requestID > 0);
+        }     
     }
 }

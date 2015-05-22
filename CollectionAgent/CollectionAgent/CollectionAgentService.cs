@@ -80,12 +80,12 @@ namespace CollectionAgent
 
                 // Read a message from the client.   
                 Console.WriteLine("Waiting for client message...");
-                CollectionAgentMessage caMsg = ReadMessage(sslStream);
-
-                Console.WriteLine("Received: {0}", caMsg.ToJSON());
+                CollectionAgentMessage caMsg = ReadMessage(sslStream);            
 
                 if (null != caMsg)
                 {
+                    Console.WriteLine("Received: {0}", caMsg.ToJSON());
+
                     // We have a valid query, process it
                     CollectionAgentMessage caResp = processClientQuery(caMsg);                    
                  
@@ -168,7 +168,7 @@ namespace CollectionAgent
 
             // Write a response message to the client. 
             CollectionAgentMessage caResp = null;
-
+           
             switch (msgType)
             {
                 case MessageType.CollectionAgentMessage:
@@ -188,7 +188,7 @@ namespace CollectionAgent
                     break;
             }          
 
-            return caResp;
+            return caResp.isValid() ? caResp : null;
         }
     }
 }

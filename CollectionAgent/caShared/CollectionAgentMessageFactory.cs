@@ -93,7 +93,7 @@ namespace caShared
 
             ms.Close();
 
-            return caMsg;
+            return caMsg.isValid() ? caMsg : null;
         }
     }
 }

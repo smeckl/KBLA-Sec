@@ -12,13 +12,20 @@ namespace caShared
     [DataContract]
     public class DerivedCollectionAgentMessage : CollectionAgentMessage
     {
+        private static String strRequestType = "DerivedCollectionAgentMessage";
+
         [DataMember]
         public String derivedMessage { get; set; }
 
         public DerivedCollectionAgentMessage(ulong ulReqID, String strDerivedMsg) : base(ulReqID)
         {
-            requestType = "DerivedCollectionAgentMessage";
+            requestType = strRequestType;
             derivedMessage = strDerivedMsg;
+        }
+
+        public override bool isValid()
+        {
+            return (base.isValid() && 0 == requestType.CompareTo(strRequestType));
         }
     }
 }
