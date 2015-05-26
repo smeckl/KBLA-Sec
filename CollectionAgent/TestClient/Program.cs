@@ -22,11 +22,8 @@ namespace TestClient
                                                       X509Chain chain,
                                                       SslPolicyErrors sslPolicyErrors)
         {
-            // **********************************
-            // TODO:  Need to fix this!  BAD
-            return true;
-
-            if (sslPolicyErrors == SslPolicyErrors.None)
+             if (sslPolicyErrors == SslPolicyErrors.None
+                || sslPolicyErrors == SslPolicyErrors.RemoteCertificateNameMismatch)
                 return true;
 
             Console.WriteLine("Certificate error: {0}", sslPolicyErrors);

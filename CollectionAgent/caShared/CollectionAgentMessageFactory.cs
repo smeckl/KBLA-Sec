@@ -53,6 +53,7 @@ namespace caShared
 
         private static CollectionAgentMessage buildDerivedMessageObject(String strMessage, String strRequestType)
         {
+            // Use the string value to get the message type
             MessageType msgType = MessageTypeMap[strRequestType];
 
             CollectionAgentMessage caMsg = null;

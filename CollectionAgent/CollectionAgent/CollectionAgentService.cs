@@ -21,7 +21,7 @@ namespace CollectionAgent
     public partial class CollectionAgentService : ServiceBase
     {
         static X509Certificate serverCertificate = null;
-        static string m_certificateFile = ".\\collectionAgentSvc.cer";
+        static string m_certificateFile = ".\\win8-dev.cer";
 
         public CollectionAgentService()
         {
@@ -60,7 +60,7 @@ namespace CollectionAgent
         private void Initialize()
         {
             // Load certificate from a file
-            serverCertificate = X509Certificate.CreateFromCertFile(".\\collectionAgentSvc.cer");
+            serverCertificate = X509Certificate.CreateFromCertFile(m_certificateFile);
         }
 
         private static void ProcessClient(TcpClient client)
