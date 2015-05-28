@@ -54,6 +54,7 @@
     <Compile Include="CollectionAgentService.Designer.cs">
       <DependentUpon>CollectionAgentService.cs</DependentUpon>
     </Compile>
+    <Compile Include="GetRegistryKeyRequestProcessor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>

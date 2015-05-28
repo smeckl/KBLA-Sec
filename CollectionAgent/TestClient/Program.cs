@@ -64,7 +64,7 @@ namespace TestClient
                 return;
             }
 
-            DerivedCollectionAgentMessage msg = new DerivedCollectionAgentMessage(1, "Message from derived class.");
+            GetRegistryKeyRequestMessage msg = new GetRegistryKeyRequestMessage(1, RootKey.HKEY_CURRENT_USER, "Software\\CollectionAgentTest");
             //CollectionAgentMessage msg = new CollectionAgentMessage(1);
 
             // Send the message to the CollectionAgent
@@ -106,6 +106,7 @@ namespace TestClient
                 }
             } while (bytes != 0);
 
+            Console.WriteLine(messageData.ToString());
             CollectionAgentMessage deserializedMsg = CollectionAgentMessageFactory.constructMessageFromJSON(messageData.ToString());
 
             // Return the new object

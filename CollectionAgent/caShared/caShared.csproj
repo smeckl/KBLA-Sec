@@ -43,10 +43,12 @@
   <ItemGroup>
     <Compile Include="CollectionAgentErrorMessage.cs" />
     <Compile Include="CollectionAgentMessageFactory.cs" />
-    <Compile Include="CollectionAgentResponseMessage.cs" />
-    <Compile Include="DerivedCollectionAgentMessage.cs" />
+    <Compile Include="GetRegistryKeyResponseMessage.cs" />
+    <Compile Include="GetRegistryKeyRequestMessage.cs" />
     <Compile Include="CollectionAgentMessage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegKey.cs" />
+    <Compile Include="RegValue.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

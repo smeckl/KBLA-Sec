@@ -8,12 +8,15 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 
 namespace caShared
-{    
+{
     [DataContract]
-    [KnownType(typeof(DerivedCollectionAgentMessage))]
+    [KnownType(typeof(GetRegistryKeyRequestMessage))]
     public class CollectionAgentMessage
     {
         private static String strRequestType = "CollectionAgentMessage";
+
+        public static String RegexPrintableChars = "[ -~]";
+        public static String RegexPrintableCharsMinusBackslash = "[ -\\[\\]-~]";
 
         [DataMember]
         public ulong requestID { get; set; }

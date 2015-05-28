@@ -172,15 +172,12 @@ namespace CollectionAgent
             switch (msgType)
             {
                 case MessageType.CollectionAgentMessage:
-                    caResp = new CollectionAgentResponseMessage(caMsg.requestID, "Request processed successfully.");
+                    caResp = new CollectionAgentErrorMessage(caMsg.requestID, "ERROR:  Invalid request type.");
                     break;
 
-                case MessageType.DerivedCollectionAgentMessage:
-                    caResp = new CollectionAgentResponseMessage(caMsg.requestID, "Request processed successfully.");
-                    break;
-
-                case MessageType.CollectionAgentResponseMessage:
-                    caResp = new CollectionAgentResponseMessage(caMsg.requestID, "Request processed successfully.");
+                case MessageType.GetRegistryKeyRequestMessage:
+                    GetRegistryKeyRequestProcessor processor = new GetRegistryKeyRequestProcessor((GetRegistryKeyRequestMessage)caMsg);
+                    caResp = processor.processRequest();
                     break;
 
                 default:

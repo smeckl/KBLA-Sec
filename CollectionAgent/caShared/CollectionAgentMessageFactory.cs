@@ -11,8 +11,8 @@ namespace caShared
     public enum MessageType
     {
         CollectionAgentMessage,
-        DerivedCollectionAgentMessage,
-        CollectionAgentResponseMessage,
+        GetRegistryKeyRequestMessage,
+        GetRegistryKeyResponseMessage,
         CollectionAgentErrorMessage
     }
 
@@ -21,8 +21,8 @@ namespace caShared
         public static Dictionary<String, MessageType> MessageTypeMap = new Dictionary<string, MessageType>()
         {
             { "CollectionAgentMessage", MessageType.CollectionAgentMessage },
-            { "DerivedCollectionAgentMessage", MessageType.DerivedCollectionAgentMessage },
-            { "CollectionAgentResponseMessage", MessageType.CollectionAgentResponseMessage },
+            { "GetRegistryKeyRequestMessage", MessageType.GetRegistryKeyRequestMessage },
+            { "GetRegistryKeyResponseMessage", MessageType.GetRegistryKeyResponseMessage },
             { "CollectionAgentErrorMessage", MessageType.CollectionAgentErrorMessage }
         };
 
@@ -72,14 +72,14 @@ namespace caShared
                     caMsg = ser.ReadObject(ms) as CollectionAgentMessage;
                     break;
 
-                case MessageType.DerivedCollectionAgentMessage:
-                    ser = new DataContractJsonSerializer(typeof(DerivedCollectionAgentMessage));
-                    caMsg = ser.ReadObject(ms) as DerivedCollectionAgentMessage;
+                case MessageType.GetRegistryKeyRequestMessage:
+                    ser = new DataContractJsonSerializer(typeof(GetRegistryKeyRequestMessage));
+                    caMsg = ser.ReadObject(ms) as GetRegistryKeyRequestMessage;
                     break;
 
-                case MessageType.CollectionAgentResponseMessage:
-                    ser = new DataContractJsonSerializer(typeof(CollectionAgentResponseMessage));
-                    caMsg = ser.ReadObject(ms) as CollectionAgentResponseMessage;
+                case MessageType.GetRegistryKeyResponseMessage:
+                    ser = new DataContractJsonSerializer(typeof(GetRegistryKeyResponseMessage));
+                    caMsg = ser.ReadObject(ms) as GetRegistryKeyResponseMessage;
                     break;
 
                 case MessageType.CollectionAgentErrorMessage:
