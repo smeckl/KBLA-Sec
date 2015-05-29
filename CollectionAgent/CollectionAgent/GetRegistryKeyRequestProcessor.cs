@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Copyright 2015 Steve Meckl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,8 +69,10 @@ namespace CollectionAgent
                 // Set the path on the Registry key
                 regResponse.regKey.path = requestMessage.keyPath;
 
+                // Populate the Registry key with values and subkeys
                 populateRegistrykey(regResponse.regKey, regKey);
 
+                // Set the return value
                 responseMsg = regResponse;
             }
             else // send an error message instead
@@ -104,43 +120,48 @@ namespace CollectionAgent
 
                 for (int i = 0; i < valNames.Length; i++)
                 {
-                    RegistryValueKind valKind = sysKey.GetValueKind(valNames[0]);
+                    RegistryValueKind valKind = sysKey.GetValueKind(valNames[i]);
+
+                    RegValue val = null;
 
                     switch (valKind)
-                    {
+                    {                        
                         case RegistryValueKind.String:
-                            RegValue val = new RegStringValue(RegValueType.String, valNames[i], (String)sysKey.GetValue(valNames[i]));
-                            values[i] = (RegValue)val;
+                            val = new RegStringValue(valNames[i], (String)sysKey.GetValue(valNames[i]));                            
                             break;
 
                         case RegistryValueKind.Binary:
-
+                            val = new RegBinaryValue(valNames[i], (byte[])sysKey.GetValue(valNames[i]));
                             break;
 
                         case RegistryValueKind.DWord:
-
+                            val = new RegDWORDValue(valNames[i], (int)sysKey.GetValue(valNames[i]));
                             break;
 
                         case RegistryValueKind.ExpandString:
-
+                            val = new RegExpandStringValue(valNames[i], 
+                                                (String)sysKey.GetValue(valNames[i], null, RegistryValueOptions.DoNotExpandEnvironmentNames),
+                                                (String)sysKey.GetValue(valNames[i]));
                             break;
 
                         case RegistryValueKind.MultiString:
-
+                            val = new RegMultiStringValue(valNames[i], (String[])sysKey.GetValue(valNames[i]));
                             break;
 
                         case RegistryValueKind.QWord:
-
+                            val = new RegQWORDValue(valNames[i], (long)sysKey.GetValue(valNames[i]));
                             break;
 
                         case RegistryValueKind.Unknown:
-
+                            val = null; // Can't handle Unknown Type
                             break;
 
                         case RegistryValueKind.None:
-
+                            val = null; // Can't handle None Type
                             break;
-                    }                    
+                    }
+                    // Save the value
+                    values[i] = (RegValue)val;
                 }
 
                 respKey.values = values;

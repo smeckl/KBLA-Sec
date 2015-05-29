@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Copyright 2015 Steve Meckl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +36,8 @@ namespace caShared
 
     [DataContract]
     [KnownType(typeof(RegStringValue))]
+    [KnownType(typeof(RegExpandStringValue))]
+    [KnownType(typeof(RegMultiStringValue))]
     [KnownType(typeof(RegBinaryValue))]
     [KnownType(typeof(RegDWORDValue))]
     [KnownType(typeof(RegQWORDValue))]
@@ -38,16 +54,12 @@ namespace caShared
             type = valType;
             name = valName;
         }
-
-        public String expandStringValue { get; set; }
-        public String[] multiStringValue { get; set; }
-        public UInt64 qwordValue { get; set; }
     }
 
     [DataContract]
     public class RegStringValue : RegValue
     {
-        public RegStringValue(RegValueType valType, String valName, String strVal) : base(valType, valName)
+        public RegStringValue(String valName, String strVal) : base(RegValueType.String, valName)
         {
             value = strVal;
         }
@@ -57,9 +69,37 @@ namespace caShared
     }
 
     [DataContract]
+    public class RegExpandStringValue : RegValue
+    {
+        public RegExpandStringValue(String valName, String strVal, String strExpandVal) : base(RegValueType.ExpandString, valName)
+        {
+            value = strVal;
+            expandValue = strExpandVal;
+        }
+
+        [DataMember]
+        public String value { get; set; }
+
+        [DataMember]
+        public String expandValue { get; set; }
+    }
+
+    [DataContract]
+    public class RegMultiStringValue : RegValue
+    {
+        public RegMultiStringValue(String valName, String[] strValues) : base(RegValueType.MultiString, valName)
+        {
+            values = strValues;
+        }
+
+        [DataMember]
+        public String[] values { get; set; }
+    }
+
+    [DataContract]
     public class RegBinaryValue : RegValue
     {
-        public RegBinaryValue(RegValueType valType, String valName, byte[] binVal) : base(valType, valName)
+        public RegBinaryValue(String valName, byte[] binVal) : base(RegValueType.Binary, valName)
         {
             value = binVal;
         }
@@ -71,24 +111,24 @@ namespace caShared
     [DataContract]
     public class RegDWORDValue : RegValue
     {
-        public RegDWORDValue(RegValueType valType, String valName, UInt32 dwordVal) : base(valType, valName)
+        public RegDWORDValue(String valName, int dwordVal) : base(RegValueType.DWord, valName)
         {
             value = dwordVal;
         }
 
         [DataMember]
-        public UInt32 value { get; set; }
+        public int value { get; set; }
     }
 
     [DataContract]
     public class RegQWORDValue : RegValue
     {
-        public RegQWORDValue(RegValueType valType, String valName, UInt64 qwordVal) : base(valType, valName)
+        public RegQWORDValue(String valName, long qwordVal) : base(RegValueType.QWord, valName)
         {
             value = qwordVal;
         }
 
         [DataMember]
-        public UInt64 value { get; set; }
+        public long value { get; set; }
     }
 }
