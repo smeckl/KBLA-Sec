@@ -13,14 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
 namespace caShared
 {
+    // This class defines the error message sent from the CollectionAgent to
+    // the client that is communicating with it.
     [DataContract]
     public class CollectionAgentErrorMessage : CollectionAgentMessage
     {

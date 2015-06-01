@@ -14,14 +14,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.IO;
-using System.Threading.Tasks;
 using System.Runtime.Serialization.Json;
 
 namespace caShared
 {
+    // This enum contains a unique message type ID for all
+    // CollectionAgent messages.
     public enum MessageType
     {
         CollectionAgentMessage,
@@ -30,8 +30,11 @@ namespace caShared
         CollectionAgentErrorMessage
     }
 
+    // This object is responsible for constructing the appropriate CollectionAgentMessage-derived
+    // object from a JSON-formatted string.
     public class CollectionAgentMessageFactory
     {
+        // This Dictionary object maps a messageID string to the appropriate numerical ID.
         public static Dictionary<String, MessageType> MessageTypeMap = new Dictionary<string, MessageType>()
         {
             { "CollectionAgentMessage", MessageType.CollectionAgentMessage },
@@ -40,6 +43,8 @@ namespace caShared
             { "CollectionAgentErrorMessage", MessageType.CollectionAgentErrorMessage }
         };
 
+        // Given a JSON-formatted message, this method constructs and returns
+        // the appropriate CollectionAgentMessage-derived object.
         public static CollectionAgentMessage constructMessageFromJSON(String strJSON)
         {
             // If there is a trailing <EOF> character, strip it so that JSON
@@ -60,11 +65,21 @@ namespace caShared
             // TODO: May need to handle exceptions here.
             DataContractJsonSerializer ser = new DataContractJsonSerializer(deserializedMsg.GetType());
             deserializedMsg = ser.ReadObject(ms) as CollectionAgentMessage;
+
+            CollectionAgentMessage retMsg = null;
+
+            if (null == deserializedMsg)
+                retMsg = new CollectionAgentErrorMessage(0, "ERROR: Failed to parse JSON message.");
+            else
+                retMsg = buildDerivedMessageObject(strJSON, deserializedMsg.requestType);
+
             ms.Close();
 
-            return buildDerivedMessageObject(strJSON, deserializedMsg.requestType);
+            return retMsg;
         }
 
+        // If the method succeeds, a CollectionAgentMessage-derived object is returned.
+        // If the method fails, null is returned.
         private static CollectionAgentMessage buildDerivedMessageObject(String strMessage, String strRequestType)
         {
             // Use the string value to get the message type
@@ -102,13 +117,13 @@ namespace caShared
                     break;
 
                 default:
-                    ser = null;
+                    caMsg = null;
                     break;
             }
 
             ms.Close();
 
-            return caMsg.isValid() ? caMsg : null;
+            return ((null != caMsg) && caMsg.isValid()) ? caMsg : null;
         }
     }
 }

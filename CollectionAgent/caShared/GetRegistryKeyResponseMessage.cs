@@ -13,11 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Collections;
 using System.Runtime.Serialization;
 
 namespace caShared
@@ -40,7 +35,7 @@ namespace caShared
 
         public override bool isValid()
         {                 
-            return (base.isValid() && 0 == requestType.CompareTo(strRequestType));
+            return (base.isValid() && 0 == requestType.CompareTo(strRequestType) && regKey.isValid());
         }
     }
 }

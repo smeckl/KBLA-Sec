@@ -13,10 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.Serialization;
 
 namespace caShared
@@ -31,5 +27,26 @@ namespace caShared
         public RegKey[] subKeys { get; set; }
         [DataMember]
         public RegValue[] values { get; set; }
+
+        // A RegKey object is valid if all sub-keys are valid and all
+        // values are valid.
+        public bool isValid()
+        {
+            bool bRet = true;
+
+            for(int i = 0; null != subKeys && bRet && i < subKeys.Length; i++)
+            {
+                if(!subKeys[i].isValid())
+                    bRet = false;
+            }
+
+            for(int i = 0; null != values && bRet && i < values.Length; i++)
+            {
+                if (!values[i].isValid())
+                    bRet = false;
+            }
+
+            return bRet;
+        }
     }
 }

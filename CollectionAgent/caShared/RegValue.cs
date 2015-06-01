@@ -13,11 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Win32;
+using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
 
 namespace caShared
@@ -54,6 +50,20 @@ namespace caShared
             type = valType;
             name = valName;
         }
+
+        // In general, a RegValue is valid if the name consists of printable characters
+        // other than the backslash
+        public virtual bool isValid()
+        {
+            bool bRet = true;
+
+            Regex valueRegEx = new Regex(CollectionAgentMessage.RegexPrintableCharsMinusBackslash, RegexOptions.IgnoreCase);
+
+            if (!valueRegEx.IsMatch(name))
+                bRet = false;
+
+            return bRet;
+        }
     }
 
     [DataContract]
@@ -66,6 +76,24 @@ namespace caShared
 
         [DataMember]
         public String value { get; set; }
+
+        public override bool isValid()
+        {
+            bool bRet = true;
+
+            if (!base.isValid())
+                bRet = false;
+
+            if(bRet)
+            {
+                Regex valueRegEx = new Regex(CollectionAgentMessage.RegexPrintableChars, RegexOptions.IgnoreCase);
+
+                if (!valueRegEx.IsMatch(name))
+                    bRet = false;
+            }
+
+            return bRet;
+        }
     }
 
     [DataContract]
@@ -82,6 +110,37 @@ namespace caShared
 
         [DataMember]
         public String expandValue { get; set; }
+
+        // This class is valid if the value and expand valuse are comprised of
+        // printable characters except the backslash.
+        public override bool isValid()
+        {
+            bool bRet = true;
+
+            // Validate the base class
+            if (!base.isValid())
+                bRet = false;
+
+            // validate the value attribute
+            if (bRet)
+            {
+                Regex valueRegEx = new Regex(CollectionAgentMessage.RegexPrintableChars, RegexOptions.IgnoreCase);
+
+                if (!valueRegEx.IsMatch(value))
+                    bRet = false;
+            }
+
+            // Validate the expanded string
+            if (bRet)
+            {
+                Regex valueRegEx = new Regex(CollectionAgentMessage.RegexPrintableChars, RegexOptions.IgnoreCase);
+
+                if (!valueRegEx.IsMatch(expandValue))
+                    bRet = false;
+            }
+
+            return bRet;
+        }
     }
 
     [DataContract]
@@ -94,6 +153,29 @@ namespace caShared
 
         [DataMember]
         public String[] values { get; set; }
+
+        // A MultiString is valid if all strings in the array are comprised
+        // of printable chracters.
+        public override bool isValid()
+        {
+            bool bRet = true;
+
+            if (!base.isValid())
+                bRet = false;
+
+            if(!bRet)
+            {
+                Regex valueRegEx = new Regex(CollectionAgentMessage.RegexPrintableChars, RegexOptions.IgnoreCase);
+
+                for(int i = 0; bRet && i < values.Length; i++)
+                {
+                    if (!valueRegEx.IsMatch(values[i]))
+                        bRet = false;
+                }
+            }
+
+            return bRet;
+        }
     }
 
     [DataContract]

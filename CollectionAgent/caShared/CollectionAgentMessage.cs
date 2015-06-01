@@ -13,16 +13,16 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 
 namespace caShared
 {
+    // This is the base class tht all CollectionAgent message classes are
+    // derived from.  It contains the attributes associated with all 
+    // messages and the code to serialize the object as JSON.
     [DataContract]
     [KnownType(typeof(GetRegistryKeyRequestMessage))]
     public class CollectionAgentMessage
@@ -46,6 +46,7 @@ namespace caShared
             requestType = strRequestType;
         }
 
+        // Serialize the object into a JSON-formatted string.
         public String ToJSON()
         {
             //Create a stream to serialize the object to.
@@ -73,6 +74,8 @@ namespace caShared
             return strJSONMsg.ToString();
         }   
         
+        // Determine if the object is in a valid state.
+        // This method should be overridden by all subclasses.
         public virtual Boolean isValid()
         {
             return (requestID > 0);

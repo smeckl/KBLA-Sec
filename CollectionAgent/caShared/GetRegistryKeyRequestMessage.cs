@@ -13,10 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
@@ -37,7 +33,7 @@ namespace caShared
     public class GetRegistryKeyRequestMessage : CollectionAgentMessage
     {
         private static String strRequestType = "GetRegistryKeyRequestMessage";
-        private static String keyPathRegEx = "^" + CollectionAgentErrorMessage.RegexPrintableChars + "*$";
+        private static String keyPathRegEx = "^" + CollectionAgentMessage.RegexPrintableChars + "*$";
 
         [DataMember]
         public RootKey root { get; set; }
@@ -52,6 +48,8 @@ namespace caShared
             keyPath = strKeyPath;
         }
 
+        // This object is valid if the path is a valid Registry path and the
+        // Registy root is a valid root path.
         public override bool isValid()
         {
             bool retVal = true;
