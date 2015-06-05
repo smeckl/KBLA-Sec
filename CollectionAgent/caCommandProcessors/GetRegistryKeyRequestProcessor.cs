@@ -13,77 +13,97 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Win32;
 using caShared;
+using caCommandMessages;
 
-namespace CollectionAgent
+namespace caCommandProcessors
 {
-    class GetRegistryKeyRequestProcessor
+    public class ProcessorLoader
     {
-        private GetRegistryKeyRequestMessage requestMessage { get; set; }
-
-        public GetRegistryKeyRequestProcessor(GetRegistryKeyRequestMessage requestMsg)
+        public ICommandProcessor[] getProcessorList()
         {
-            requestMessage = requestMsg;
+            ICommandProcessor[] procList = new ICommandProcessor[1];
+
+            procList[0] = new GetRegistryKeyRequestProcessor();
+
+            return procList;
+        }
+    }
+
+
+    public class GetRegistryKeyRequestProcessor : ICommandProcessor
+    {
+        public String requestType { get; private set; }
+
+        public GetRegistryKeyRequestProcessor()
+        {
+            requestType = "GetRegistryKeyRequestMessage";
         }
 
-        public CollectionAgentMessage processRequest()
+        public CollectionAgentMessage processCommand(CollectionAgentMessage msg)
         {
             CollectionAgentMessage responseMsg = null;
+            GetRegistryKeyRequestMessage requestMessage = null;
 
-            RegistryKey regKey = null;
-
-            // Open the key from the appropriate root key
-            switch(requestMessage.root)
+            if(typeof(GetRegistryKeyRequestMessage) != msg.GetType())
             {
-                case RootKey.HKEY_CLASSES_ROOT:
-                    regKey = Registry.ClassesRoot.OpenSubKey(requestMessage.keyPath, false);
-                    break;
-
-                case RootKey.HKEY_CURRENT_CONFIG:
-                    regKey = Registry.CurrentConfig.OpenSubKey(requestMessage.keyPath, false);
-                    break;
-
-                case RootKey.HKEY_CURRENT_USER:
-                    regKey = Registry.CurrentUser.OpenSubKey(requestMessage.keyPath, false);
-                    break;
-
-                case RootKey.HKEY_LOCAL_MACHINE:
-                    regKey = Registry.LocalMachine.OpenSubKey(requestMessage.keyPath, false);
-                    break;
-
-                case RootKey.HKEY_USERS:
-                    regKey = Registry.Users.OpenSubKey(requestMessage.keyPath, false);
-                    break;
+                responseMsg = new CollectionAgentErrorMessage(msg.requestID, "Invalid request type.");
             }
-
-            // If we found the key, then read the values and 
-            if (null != regKey)
+            else
             {
-                GetRegistryKeyResponseMessage regResponse = new GetRegistryKeyResponseMessage(requestMessage.requestID);
+                RegistryKey regKey = null;
 
-                // Set the path on the Registry key
-                regResponse.regKey.path = requestMessage.keyPath;
+                requestMessage = (GetRegistryKeyRequestMessage)msg;
 
-                // Populate the Registry key with values and subkeys
-                populateRegistrykey(regResponse.regKey, regKey);
+                // Open the key from the appropriate root key
+                switch (requestMessage.root)
+                {
+                    case RootKey.HKEY_CLASSES_ROOT:
+                        regKey = Registry.ClassesRoot.OpenSubKey(requestMessage.keyPath, false);
+                        break;
 
-                // Set the return value
-                responseMsg = regResponse;
-            }
-            else // send an error message instead
-            {
-                responseMsg = new CollectionAgentErrorMessage(requestMessage.requestID, "Registry key not found");
+                    case RootKey.HKEY_CURRENT_CONFIG:
+                        regKey = Registry.CurrentConfig.OpenSubKey(requestMessage.keyPath, false);
+                        break;
+
+                    case RootKey.HKEY_CURRENT_USER:
+                        regKey = Registry.CurrentUser.OpenSubKey(requestMessage.keyPath, false);
+                        break;
+
+                    case RootKey.HKEY_LOCAL_MACHINE:
+                        regKey = Registry.LocalMachine.OpenSubKey(requestMessage.keyPath, false);
+                        break;
+
+                    case RootKey.HKEY_USERS:
+                        regKey = Registry.Users.OpenSubKey(requestMessage.keyPath, false);
+                        break;
+                }
+
+                // If we found the key, then read the values and 
+                if (null != regKey)
+                {
+                    GetRegistryKeyResponseMessage regResponse = new GetRegistryKeyResponseMessage(requestMessage.requestID);
+
+                    // Set the path on the Registry key
+                    regResponse.regKey.path = requestMessage.keyPath;
+
+                    // Populate the Registry key with values and subkeys
+                    populateRegistrykey(regResponse.regKey, regKey);
+
+                    // Set the return value
+                    responseMsg = regResponse;
+                }
+                else // send an error message instead
+                {
+                    responseMsg = new CollectionAgentErrorMessage(requestMessage.requestID, "Registry key not found");
+                }
             }
 
             return responseMsg;
         }
 
-        private void populateRegistrykey(caShared.RegKey respKey, RegistryKey sysKey)
+        private void populateRegistrykey(caCommandMessages.RegKey respKey, RegistryKey sysKey)
         {
             // First, populate the values for this key
             populateRegKeyValues(respKey, sysKey);
@@ -110,7 +130,7 @@ namespace CollectionAgent
             }
         }
 
-        private void populateRegKeyValues(caShared.RegKey respKey, RegistryKey sysKey)
+        private void populateRegKeyValues(caCommandMessages.RegKey respKey, RegistryKey sysKey)
         {
             String[] valNames = sysKey.GetValueNames();
 
@@ -125,9 +145,9 @@ namespace CollectionAgent
                     RegValue val = null;
 
                     switch (valKind)
-                    {                        
+                    {
                         case RegistryValueKind.String:
-                            val = new RegStringValue(valNames[i], (String)sysKey.GetValue(valNames[i]));                            
+                            val = new RegStringValue(valNames[i], (String)sysKey.GetValue(valNames[i]));
                             break;
 
                         case RegistryValueKind.Binary:
@@ -139,7 +159,7 @@ namespace CollectionAgent
                             break;
 
                         case RegistryValueKind.ExpandString:
-                            val = new RegExpandStringValue(valNames[i], 
+                            val = new RegExpandStringValue(valNames[i],
                                                 (String)sysKey.GetValue(valNames[i], null, RegistryValueOptions.DoNotExpandEnvironmentNames),
                                                 (String)sysKey.GetValue(valNames[i]));
                             break;

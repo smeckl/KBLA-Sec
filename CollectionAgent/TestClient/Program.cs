@@ -20,6 +20,7 @@ using System.Security.Authentication;
 using System.Text;
 using System.Security.Cryptography.X509Certificates;
 using caShared;
+using caCommandMessages;
 
 namespace TestClient
 {
@@ -119,7 +120,21 @@ namespace TestClient
             } while (bytes != 0);
 
             Console.WriteLine(messageData.ToString());
-            GetRegistryKeyResponseMessage deserializedMsg = (GetRegistryKeyResponseMessage)CollectionAgentMessageFactory.constructMessageFromJSON(messageData.ToString());
+
+            String strJSON = messageData.ToString();
+
+            // If there is a trailing <EOF> character, strip it so that JSON
+            // deserialization will work correctly
+            int index = (strJSON.IndexOf("<EOF>"));
+            if (index != -1)
+            {
+                strJSON = strJSON.Substring(0, index);
+            }
+
+            ICommandMessageFactory factory = new CommandMessageFactory();
+
+            GetRegistryKeyResponseMessage deserializedMsg = 
+                (GetRegistryKeyResponseMessage)factory.constructMessageFromJSON("GetRegistryKeyResponseMessage", strJSON);
 
             // Return the new object
             return deserializedMsg;

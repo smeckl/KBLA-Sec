@@ -15,6 +15,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestClient", "TestClient\Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "caShared", "caShared\caShared.csproj", "{8F8628B9-7C9C-4A78-A8BD-4CCB75382382}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "caCommandProcessors", "caCommandProcessors\caCommandProcessors.csproj", "{1C9D05AD-7157-4CF3-B153-C382B976E684}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8F8628B9-7C9C-4A78-A8BD-4CCB75382382} = {8F8628B9-7C9C-4A78-A8BD-4CCB75382382}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "caCommandMessages", "caCommandMessages.cs\caCommandMessages.csproj", "{94E4B6F7-9650-482C-8F7A-F22B90B46947}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +40,14 @@ Global
 		{8F8628B9-7C9C-4A78-A8BD-4CCB75382382}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F8628B9-7C9C-4A78-A8BD-4CCB75382382}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F8628B9-7C9C-4A78-A8BD-4CCB75382382}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C9D05AD-7157-4CF3-B153-C382B976E684}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C9D05AD-7157-4CF3-B153-C382B976E684}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C9D05AD-7157-4CF3-B153-C382B976E684}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C9D05AD-7157-4CF3-B153-C382B976E684}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94E4B6F7-9650-482C-8F7A-F22B90B46947}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94E4B6F7-9650-482C-8F7A-F22B90B46947}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94E4B6F7-9650-482C-8F7A-F22B90B46947}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94E4B6F7-9650-482C-8F7A-F22B90B46947}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

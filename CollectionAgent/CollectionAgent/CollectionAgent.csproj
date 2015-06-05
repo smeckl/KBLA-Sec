@@ -18,7 +18,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -27,7 +27,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -54,7 +54,6 @@
     <Compile Include="CollectionAgentService.Designer.cs">
       <DependentUpon>CollectionAgentService.cs</DependentUpon>
     </Compile>
-    <Compile Include="GetRegistryKeyRequestProcessor.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>
@@ -73,6 +72,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\caCommandProcessors\caCommandProcessors.csproj">
+      <Project>{1c9d05ad-7157-4cf3-b153-c382b976e684}</Project>
+      <Name>caCommandProcessors</Name>
+    </ProjectReference>
     <ProjectReference Include="..\caShared\caShared.csproj">
       <Project>{8f8628b9-7c9c-4a78-a8bd-4ccb75382382}</Project>
       <Name>caShared</Name>

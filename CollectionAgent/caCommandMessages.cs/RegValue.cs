@@ -15,8 +15,9 @@
 using System;
 using System.Text.RegularExpressions;
 using System.Runtime.Serialization;
+using caShared;
 
-namespace caShared
+namespace caCommandMessages
 {
     public enum RegValueType
     {

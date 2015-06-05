@@ -24,7 +24,7 @@ namespace caShared
     // derived from.  It contains the attributes associated with all 
     // messages and the code to serialize the object as JSON.
     [DataContract]
-    [KnownType(typeof(GetRegistryKeyRequestMessage))]
+    //[KnownType(typeof(GetRegistryKeyRequestMessage))]
     public class CollectionAgentMessage
     {
         private static String strRequestType = "CollectionAgentMessage";

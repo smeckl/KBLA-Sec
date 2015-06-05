@@ -15,8 +15,9 @@
 using System;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using caShared;
 
-namespace caShared
+namespace caCommandMessages
 {
     public enum RootKey
     {

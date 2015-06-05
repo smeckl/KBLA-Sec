@@ -14,8 +14,9 @@
 
 using System;
 using System.Runtime.Serialization;
+using caShared;
 
-namespace caShared
+namespace caCommandMessages
 {
     // This class demonstrates what a query response message looks
     // like

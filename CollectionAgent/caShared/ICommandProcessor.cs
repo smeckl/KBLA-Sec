@@ -16,20 +16,9 @@ using System;
 
 namespace caShared
 {
-    // This object is responsible for constructing the appropriate CollectionAgentMessage-derived
-    // object from a JSON-formatted string.
-    public class CollectionAgentMessageFactory : CommandMessageFactoryImpl, ICommandMessageFactory
+    public interface ICommandProcessor
     {
-        public String[] supportedMessages { get; } =
-        {
-            "CollectionAgentMessage",
-            "CollectionAgentErrorMessage"
-        };
-
-        public CollectionAgentMessageFactory()
-        {
-            typeMap.Add(supportedMessages[0], typeof(CollectionAgentMessage));
-            typeMap.Add(supportedMessages[1], typeof(CollectionAgentErrorMessage));
-        }
+        String requestType { get; }
+        CollectionAgentMessage processCommand(CollectionAgentMessage requestMessage);
     }
 }

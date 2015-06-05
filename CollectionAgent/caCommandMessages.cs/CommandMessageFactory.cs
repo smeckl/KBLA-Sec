@@ -13,23 +13,24 @@
 // limitations under the License.
 
 using System;
+using caShared;
 
-namespace caShared
+namespace caCommandMessages
 {
-    // This object is responsible for constructing the appropriate CollectionAgentMessage-derived
-    // object from a JSON-formatted string.
-    public class CollectionAgentMessageFactory : CommandMessageFactoryImpl, ICommandMessageFactory
+    public class CommandMessageFactory : CommandMessageFactoryImpl, ICommandMessageFactory
     {
+        // Definen the strings for supported messae types
         public String[] supportedMessages { get; } =
         {
-            "CollectionAgentMessage",
-            "CollectionAgentErrorMessage"
+            "GetRegistryKeyRequestMessage",
+            "GetRegistryKeyResponseMessage"
         };
 
-        public CollectionAgentMessageFactory()
+        // Add the types to the map
+        public CommandMessageFactory()
         {
-            typeMap.Add(supportedMessages[0], typeof(CollectionAgentMessage));
-            typeMap.Add(supportedMessages[1], typeof(CollectionAgentErrorMessage));
+            typeMap.Add(supportedMessages[0], typeof(GetRegistryKeyRequestMessage));
+            typeMap.Add(supportedMessages[1], typeof(GetRegistryKeyResponseMessage));
         }
     }
 }

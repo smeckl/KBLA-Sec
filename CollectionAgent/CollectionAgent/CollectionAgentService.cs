@@ -20,6 +20,11 @@ using System.Net.Sockets;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Collections.Generic;
+using System.Collections;
+using System.Reflection;
+using System.IO;
+using System.Runtime.Serialization.Json;
 using caShared;
 
 namespace CollectionAgent
@@ -28,6 +33,21 @@ namespace CollectionAgent
     {
         static X509Certificate serverCertificate = null;
         static string m_certificateFile = ".\\win8-dev.cer";
+
+        private Dictionary<String, ICommandProcessor> processorMap = new Dictionary<String, ICommandProcessor>();
+
+        private Dictionary<String, ICommandMessageFactory> msgFactoryMap = new Dictionary<string, ICommandMessageFactory>();
+
+        private static String[] dllList =
+        {
+            "caCommandProcessors.dll",
+            "caCommandMessages.dll",
+            "caShared.dll"
+        };
+
+        private Assembly[] assemblyList = new Assembly[dllList.Length];
+
+        private ArrayList knownTypeList = new ArrayList();
 
         public CollectionAgentService()
         {
@@ -63,13 +83,69 @@ namespace CollectionAgent
             }
         }
 
+        // This method initializes the service by loading the certifiate and loading
+        // Processor DLLs
         private void Initialize()
         {
             // Load certificate from a file
             serverCertificate = X509Certificate.CreateFromCertFile(m_certificateFile);
+
+
+            loadMapsFromDLLList();
         }
 
-        private static void ProcessClient(TcpClient client)
+        private void loadMapsFromDLLList()
+        {
+            // Load command processor map
+            for (int i = 0; i < dllList.Length; i++)
+            {
+                // Attempt to load the DLL
+                assemblyList[i] = Assembly.LoadFrom(dllList[i]);
+
+                // If we successfully loaded the file, then attempt to load interfaces
+                if (null != assemblyList[i])
+                {
+                    // Get the list of types exported from the DLL
+                    Type[] allTypes = assemblyList[i].GetTypes();
+
+                    foreach (Type type in allTypes)
+                    {
+                        // If this is an ICommandProcessor object, add it to the processor map
+                        if (!type.IsAbstract && typeof(ICommandProcessor).IsAssignableFrom(type))
+                        {
+                            // Create a instance of the class
+                            ICommandProcessor proc = (ICommandProcessor)Activator.CreateInstance(type);
+
+                            // Add the instance to the processorMap
+                            if (null != proc)
+                            {
+                                processorMap.Add(proc.requestType, proc);
+                            }
+                        }
+                        else if (!type.IsAbstract && typeof(ICommandMessageFactory).IsAssignableFrom(type))
+                        {
+                            // Create a instance of the class
+                            ICommandMessageFactory factory = (ICommandMessageFactory)Activator.CreateInstance(type);
+
+                            // Add the instance to the message factory map
+                            if (null != factory)
+                            {
+                                for(int j = 0; j < factory.supportedMessages.Length; j++)
+                                {
+                                    msgFactoryMap.Add(factory.supportedMessages[j], factory);
+                                }
+                            }
+                        }
+                        else if (!type.IsAbstract && typeof(CollectionAgentMessage).IsAssignableFrom(type))
+                        {
+                            knownTypeList.Add(type);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void ProcessClient(TcpClient client)
         {
             // A client has connected. Create the  
             // SslStream using the client's network stream.
@@ -130,8 +206,10 @@ namespace CollectionAgent
             }
         }
 
-        private static CollectionAgentMessage ReadMessage(SslStream sslStream)
+        private CollectionAgentMessage ReadMessage(SslStream sslStream)
         {
+            CollectionAgentMessage deserializedMsg = null;
+
             // Read the  message sent by the client. 
             // The client signals the end of the message using the 
             // "<EOF>" marker.
@@ -157,7 +235,33 @@ namespace CollectionAgent
                 }
             } while (bytes != 0);
 
-            CollectionAgentMessage deserializedMsg =  CollectionAgentMessageFactory.constructMessageFromJSON(messageData.ToString());
+            String strJSON = messageData.ToString();
+
+            // If there is a trailing <EOF> character, strip it so that JSON
+            // deserialization will work correctly
+            int index = (strJSON.IndexOf("<EOF>"));
+            if (index != -1)
+            {
+                strJSON = strJSON.Substring(0, index);
+            }
+
+            // Read String data into a MemoryStream so it can be deserialized
+            MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(strJSON));
+
+            // Deserialize the stream into an object
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(CollectionAgentMessage));
+            
+            CollectionAgentMessage baseMsg = ser.ReadObject(ms) as CollectionAgentMessage;
+
+            ms.Close();
+
+            if(null != baseMsg)
+            {
+                ICommandMessageFactory factory = msgFactoryMap[baseMsg.requestType];
+
+                if (null != factory)
+                    deserializedMsg = factory.constructMessageFromJSON(baseMsg.requestType, strJSON);
+            }
 
             // Return the new object
             return deserializedMsg;
@@ -168,28 +272,19 @@ namespace CollectionAgent
         // For now, this is a skeleton function only.  As reall queries are created, this function
         // will be populated with calls to code that will actually process and respond to the
         // queries.
-        private static CollectionAgentMessage processClientQuery(CollectionAgentMessage caMsg)
+        private CollectionAgentMessage processClientQuery(CollectionAgentMessage caMsg)
         {
-            MessageType msgType = CollectionAgentMessageFactory.MessageTypeMap[caMsg.requestType];
-
-            // Write a response message to the client. 
+             // Write a response message to the client. 
             CollectionAgentMessage caResp = null;
-           
-            switch (msgType)
-            {
-                case MessageType.CollectionAgentMessage:
-                    caResp = new CollectionAgentErrorMessage(caMsg.requestID, "ERROR:  Invalid request type.");
-                    break;
 
-                case MessageType.GetRegistryKeyRequestMessage:
-                    GetRegistryKeyRequestProcessor processor = new GetRegistryKeyRequestProcessor((GetRegistryKeyRequestMessage)caMsg);
-                    caResp = processor.processRequest();
-                    break;
+            // Get the appropriate ICommandProcessor object based on the request type.
+            ICommandProcessor processor = processorMap[caMsg.requestType];
 
-                default:
-                    caResp = new CollectionAgentErrorMessage(caMsg.requestID, "ERROR:  Invalid request type.");
-                    break;
-            }          
+            // If the object is not null, then call processCommand()
+            if (null != processor)
+                caResp = processor.processCommand(caMsg);
+            else
+                caResp = new CollectionAgentErrorMessage(caMsg.requestID, "ERROR:  Invalid request type.");
 
             return caResp.isValid() ? caResp : null;
         }
